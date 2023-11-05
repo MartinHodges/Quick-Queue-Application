@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: qqapp
+  name: qqapp
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: qqapp
+  template:
+    metadata:
+      labels:
+        app: qqapp
+    spec:
+      containers:
+        - name: qqapp
+          image: <docker hub username>/qqapp:latest
+          ports:
+            - containerPort: 9191
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: DB_HOST
+              value: postgres-postgresql.postgres.svc.cluster.local
+            - name: DB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: db-user-pass
+                  key: username
+            - name: DB_PW
+              valueFrom:
+                secretKeyRef:
+                  name: db-user-pass
+                  key: password
+      imagePullSecrets:
+        - name: my-registry-secret
