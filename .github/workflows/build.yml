@@ -46,3 +46,37 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKERHUB_USERNAME }}/qqapp:${{github.run_number}}, ${{ secrets.DOCKERHUB_USERNAME }}/qqapp:latest
+
+      - name: Copy k8s config
+        run: |
+          mkdir /tmp/k8s
+          cp k8s/* /tmp/k8s
+
+      - name: Fetch k8s repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.USERNAME_GITHUB }}/QQ-deployment
+          ref: main
+          token: ${{secrets.my_pat}}
+
+      - name: Update
+        run: |
+          mkdir -p qqapp
+          cp /tmp/k8s/* qqapp
+
+      - name: Update version
+        uses: jacobtomlinson/gha-find-replace@v3
+        with:
+          find: "image: ${{ secrets.DOCKERHUB_USERNAME }}/qqapp:.*"
+          replace: "image: ${{ secrets.DOCKERHUB_USERNAME }}/qqapp:${{github.run_number}}"
+          include: "qqapp/deployment.yml"
+
+      - name: Push to deployment repo
+        run: |
+          git config --global user.name ${{ vars.USERNAME_GITHUB }}
+          git config --global user.email ${{ vars.EMAIL }}
+          git remote set-url origin https://x-access-token:${{ secrets.my_pat }}@github.com/${{ vars.USERNAME_GITHUB }}/QQ-deployment.git
+          git add .
+          git commit -am "Build ${{github.run_number}}"
+          git push
+
