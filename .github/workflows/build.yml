@@ -55,7 +55,7 @@ jobs:
       - name: Fetch k8s repo
         uses: actions/checkout@v4
         with:
-          repository: ${{ vars.USERNAME_GITHUB }}/QQ-deployment
+          repository: ${{ vars.USERNAME_GITHUB }}/Quick-Queue-Deployment
           ref: main
           token: ${{secrets.my_pat}}
 
